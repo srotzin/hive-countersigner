@@ -191,6 +191,7 @@ def countersign():
         "countersigned": True,
         "seq": seq,
         "signed_over": signed_over,
+        "signed_over_canonical": canon(signed_over).decode(),
         "countersignature": cs_sig,
         "countersignature_scheme": "Ed25519",
         "countersigner_public_key_b64": PUB_B64,
@@ -220,6 +221,8 @@ def inclusion():
     signed_over = {k: v for k, v in entry.items() if k != "countersignature"}
     return jsonify({"seq": seq,
                     "signed_over": signed_over,
+                    "signed_over_canonical": canon(signed_over).decode(),
+                    "countersigner_public_key_b64": PUB_B64,
                     "countersignature": entry["countersignature"],
                     "audit_path": merkle_path(leaves, seq - 1),
                     "root": merkle_root(leaves)})
