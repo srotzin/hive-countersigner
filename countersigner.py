@@ -118,6 +118,21 @@ def apply_path(leaf, path):
 
 app = Flask(__name__)
 
+# The browser verifier on thehiveryiq.com checks countersignatures client side,
+# so the service has to answer a cross origin read. Everything it serves is
+# public by design: a public key, published signed bytes and a log root.
+@app.after_request
+def _cors(resp):
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type,Accept"
+    resp.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    return resp
+
+@app.route("/<path:_any>", methods=["OPTIONS"])
+@app.route("/", methods=["OPTIONS"])
+def _preflight(_any=None):
+    return ("", 204)
+
 INDEPENDENCE_NOTE = (
     "This countersigner is operated by Hive. It holds a separate key and keeps a "
     "separate clock and log from the serving operator, which removes self-dated "
