@@ -31,7 +31,32 @@ LOG_PATH = os.path.join(LOG_DIR, "countersign_log.jsonl")
 # not set the process is running on ephemeral storage and the log does not
 # survive a redeploy. /health reports that honestly rather than implying
 # durability the host does not provide.
-LOG_DURABLE = os.environ.get("COUNTERSIGNER_LOG_DURABLE", "").lower() == "true"
+def _durability():
+    """Decide durability from the filesystem, not from a promise.
+
+    An env flag can be set by anyone and proves nothing, so it can only turn
+    durability OFF here, never on. To read true, the log directory has to be a
+    real mount point, separate from the container filesystem, and writable by
+    this process. Anything else reports false with the reason.
+    """
+    if os.environ.get("COUNTERSIGNER_LOG_DURABLE", "").lower() == "false":
+        return False, "durability disabled by configuration"
+    if not os.path.isdir(LOG_DIR):
+        return False, f"log directory {LOG_DIR} does not exist"
+    if not os.path.ismount(LOG_DIR):
+        return False, (f"log directory {LOG_DIR} is on the container filesystem, "
+                       "not a mounted disk, so it does not survive a redeploy")
+    probe = os.path.join(LOG_DIR, ".write_probe")
+    try:
+        with open(probe, "w") as f:
+            f.write(str(time.time()))
+        os.remove(probe)
+    except OSError as e:
+        return False, f"mounted disk at {LOG_DIR} is not writable: {e}"
+    return True, f"log is on a mounted persistent disk at {LOG_DIR}"
+
+
+LOG_DURABLE, LOG_DURABILITY_REASON = _durability()
 MIN_OPERATOR_SIG = 1000   # the operator signer emits 4400+ chars; refuse stubs
 
 _lock = threading.Lock()
@@ -153,8 +178,10 @@ def health():
         "public_key_b64": PUB_B64,
         "log_entries": len(log),
         "log_durable": LOG_DURABLE,
+        "log_dir": LOG_DIR,
+        "log_durability_reason": LOG_DURABILITY_REASON,
         "log_durability_note": (
-            "Log is on a persistent disk." if LOG_DURABLE else
+            "Log is on a mounted persistent disk and survives a redeploy." if LOG_DURABLE else
             "Log is on ephemeral storage and does not survive a redeploy. Until a "
             "persistent disk is attached, treat the log as append-only within a "
             "process lifetime only, and do not describe it as a durable "
