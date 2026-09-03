@@ -351,12 +351,28 @@ def register(app):
 
     @app.get("/briefing/check")
     def briefing_check_form():
+        # Arriving here by link, by code, or by pasting an identifier into the
+        # form on the briefing page. Say something either way. A reader who
+        # pastes a wrong identifier and gets a silent form back learns nothing.
         rid = (request.args.get("id") or "").strip()
         prefill = ""
-        r = _load(rid)
-        if r:
-            prefill = r["signed_body"]["action_text"]
-        return Response(_render_verifier(rid, prefill, None), status=200,
+        out = None
+        status = 200
+        if rid:
+            if not RECEIPT_ID_RE.match(rid):
+                out = {"error": "That is not a receipt identifier. They look "
+                                "like r_brf_ followed by numbers and letters."}
+                status = 422
+            else:
+                r = _load(rid)
+                if r is None:
+                    out = {"error": "No record with that identifier. Check for a "
+                                    "missing character and try again."}
+                    status = 404
+                else:
+                    prefill = r["signed_body"]["action_text"]
+                    out = {"found": r["signed_body"]["observed_at"]}
+        return Response(_render_verifier(rid, prefill, out), status=status,
                         mimetype="text/html")
 
     # ------------------------------------------------------------------- qr
@@ -451,7 +467,13 @@ long as this service runs.</p>
 def _render_verifier(rid, txt, out):
     block = ""
     if out is not None:
-        if "error" in out:
+        if "found" in out:
+            block = (
+                '<div class="r"><p class="v" style="font-size:16px">RECORD FOUND</p>'
+                '<p>Recorded at %s. The text below is what was recorded. Submit '
+                'it unchanged for a match, or change it to see the other answer.'
+                '</p></div>' % escape(out["found"]))
+        elif "error" in out:
             block = ('<div class="r e"><p class="v">CANNOT CHECK</p><p>%s</p></div>'
                      % escape(out["error"]))
         elif out["match"]:
