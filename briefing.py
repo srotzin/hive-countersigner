@@ -460,7 +460,11 @@ runs without scripts and stores nothing about you.</p>
 <p class="b">A match means the text you submitted is byte for byte the text that
 was recorded. A mismatch means it is not. Neither result shows who changed
 anything, why, or that a change was stopped. Records are checkable here for as
-long as this service runs.</p>
+long as this service runs, and the continuity package exists so records stay
+checkable even if Hive disappears.</p>
+<p class="b">Briefing-page records are public demo records whose text is
+intentionally stored so anyone can check them. Customer receipts hold
+fingerprints only, never the content itself.</p>
 </div></body></html>"""
 
 
@@ -514,9 +518,13 @@ _ISSUED_HTML = """<!DOCTYPE html>
 <p class="mk">Hiv<s>e</s></p>
 {{ body|safe }}
 <p class="b">Keep the identifier above. Anyone can check this record here, free,
-with no account, for as long as this service runs. A check shows whether a copy
-of the text differs from what was recorded. It does not show who changed
+with no account, for as long as this service runs, and the continuity package
+exists so records stay checkable even if Hive disappears. A check shows whether
+a copy of the text differs from what was recorded. It does not show who changed
 anything, why, or that a change was stopped.</p>
+<p class="b">Briefing-page records are public demo records whose text is
+intentionally stored so anyone can check them. Customer receipts hold
+fingerprints only, never the content itself.</p>
 </div></body></html>"""
 
 
