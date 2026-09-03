@@ -1,4 +1,5 @@
-flask>=3.0
 blake3>=0.4
 cryptography>=42.0
+flask>=3.0
 gunicorn>=22.0
+segno>=1.6

@@ -189,6 +189,8 @@ def health():
         "log_root": merkle_root([e["leaf"] for e in log]),
         "independent": False,
         "independence_note": INDEPENDENCE_NOTE,
+        "briefing_receipts": globals().get("BRIEFING_ENABLED", False),
+        "briefing_error": globals().get("BRIEFING_ERROR"),
     })
 
 @app.post("/countersign")
@@ -296,6 +298,20 @@ def verify():
         out["record_digest_matches"] = (h(canon(b["record"]), "record")
                                         == signed_over.get("record_digest"))
     return jsonify(out)
+
+# Briefing receipts add the public read side: durable storage on the mounted
+# disk, a lookup route, a form post verifier that works with scripts blocked,
+# and a server rendered QR. Imported last so this module is fully initialised
+# before the briefing routes reach back into its key, lock and log.
+try:
+    import briefing
+    briefing.register(app)
+    BRIEFING_ENABLED = True
+except Exception as _e:  # pragma: no cover
+    # A missing optional dependency must not take the countersign path down.
+    # It is announced on /health rather than failing silently.
+    BRIEFING_ENABLED = False
+    BRIEFING_ERROR = "%s: %s" % (type(_e).__name__, _e)
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.environ.get("PORT", "8791")))
