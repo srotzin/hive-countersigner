@@ -179,19 +179,17 @@ BOUNDARY = ("This record shows what an action said at the moment it was "
 
 def register(app):
     # ---------------------------------------------------------------- issue
-    @app.post("/briefing/issue")
-    def briefing_issue():
+    def _do_issue(action):
+        """Returns (http_status, dict). Shared by the JSON and form paths."""
         if not _rate_ok("issue", ISSUE_PER_HOUR):
-            return jsonify({"error": "Too many records from this address in the "
-                                     "last hour. Try again later."}), 429
-        b = request.get_json(force=True, silent=True) or {}
-        action = b.get("action_text")
+            return 429, {"error": "Too many records from this address in the "
+                                  "last hour. Try again later."}
         if not isinstance(action, str) or not action.strip():
-            return jsonify({"error": "action_text must be a non empty string."}), 422
+            return 422, {"error": "Describe the action you want receipted."}
         action = action.strip()
         if len(action) > MAX_ACTION_CHARS:
-            return jsonify({"error": "action_text is longer than %d characters."
-                            % MAX_ACTION_CHARS}), 422
+            return 422, {"error": "That description is longer than %d "
+                                  "characters." % MAX_ACTION_CHARS}
 
         digest = _sha256_hex(action)
         rid = "r_brf_%010d_%s" % (int(time.time()), secrets.token_hex(8))
@@ -207,7 +205,7 @@ def register(app):
         }
         env, err = _operator_sign(cs.canon(signed_body).decode())
         if err:
-            return jsonify({"error": err}), 503
+            return 503, {"error": err}
         op_sig = env["envelope_signature"]
         countersig = _countersign_local(signed_body, op_sig, "ml-dsa-65")
         receipt = {
@@ -226,7 +224,25 @@ def register(app):
             "verify_url": "%s/briefing/check?id=%s" % (PUBLIC_BASE, rid),
         }
         _store(receipt)
-        return jsonify(receipt)
+        return 200, receipt
+
+    @app.post("/briefing/issue")
+    def briefing_issue():
+        # Two content types on one route, so a visitor whose browser blocks
+        # scripts can still make a receipt by plain form post and gets a whole
+        # HTML page back instead of raw JSON.
+        form = request.form or {}
+        wants_html = bool(form) or "text/html" in (request.headers.get("Accept") or "")
+        if form:
+            action = form.get("action_text") or ""
+        else:
+            b = request.get_json(force=True, silent=True) or {}
+            action = b.get("action_text")
+        status, out = _do_issue(action)
+        if wants_html:
+            return Response(_render_issued(out), status=status,
+                            mimetype="text/html")
+        return jsonify(out), status
 
     # ------------------------------------------------------------- read back
     @app.get("/briefing/receipt/<receipt_id>")
@@ -374,35 +390,45 @@ _VERIFIER_HTML = """<!DOCTYPE html>
 <style>
  :root{color-scheme:light}
  *{box-sizing:border-box}
- body{margin:0;background:#f7f6f2;color:#28251d;
-   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-   padding:32px 20px 64px}
+ body{margin:0;background:#f6f7f9;color:#14171b;
+   font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+   padding:32px 20px 64px;-webkit-text-size-adjust:100%}
  .w{max-width:640px;margin:0 auto}
- h1{font-size:22px;letter-spacing:-.01em;margin:0 0 6px}
- p.sub{color:#7a7974;margin:0 0 28px;font-size:15px}
- label{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
-   color:#7a7974;margin:0 0 7px}
+ .mk{font:700 18px/1 inherit;letter-spacing:.02em;margin:0 0 18px}
+ .mk s{text-decoration:none;color:#1f68d8}
+ h1{font-size:22px;letter-spacing:-.015em;margin:0 0 6px}
+ p.sub{color:#626d7d;margin:0 0 28px;font-size:15px}
+ label{display:block;font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+   color:#626d7d;margin:0 0 7px}
  input,textarea{width:100%;font:15px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-   color:#28251d;background:#fff;border:1px solid #d4d1ca;border-radius:8px;padding:11px 13px}
+   color:#14171b;background:#fff;border:1px solid #dfe4ec;border-radius:8px;padding:11px 13px}
  textarea{min-height:96px;resize:vertical}
+ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid #2f80ff;
+   outline-offset:2px}
  .f{margin:0 0 18px}
- button{font:600 15px/1 inherit;color:#fff;background:#01696f;border:0;border-radius:8px;
-   padding:14px 22px;cursor:pointer}
- button:hover{background:#0c4e54}
- .r{border:1px solid #d4d1ca;border-radius:10px;padding:20px 22px;margin:0 0 26px;background:#f9f8f5}
- .r.m{border-color:#437a22;border-left:4px solid #437a22}
- .r.x{border-color:#a12c7b;border-left:4px solid #a12c7b}
- .r.e{border-color:#964219;border-left:4px solid #964219}
- .v{font:600 19px/1.3 inherit;letter-spacing:.02em;margin:0 0 8px}
- .r.m .v{color:#2f5a17}.r.x .v{color:#7d1f5e}.r.e .v{color:#6f3113}
- .r p{margin:0 0 8px;font-size:15px}
+ button{font:650 15px/1 inherit;color:#fff;background:#1f68d8;border:1px solid #1f68d8;
+   border-radius:10px;padding:14px 22px;cursor:pointer;
+   box-shadow:0 1px 2px rgba(20,23,27,.05),0 8px 24px -16px rgba(20,23,27,.18)}
+ button:hover{background:#1a58bb}
+ .r{border:1px solid #dfe4ec;border-radius:10px;padding:20px 22px;margin:0 0 26px;background:#fff}
+ .r.m{background:#e6f6ee;border-color:#9bd9b9;border-left:4px solid #0b6b3f}
+ .r.x{background:#fdedeb;border-color:#f0b3ad;border-left:4px solid #a81f18}
+ .r.e{background:#fdedeb;border-color:#f0b3ad;border-left:4px solid #a81f18}
+ .v{font:700 20px/1.25 inherit;letter-spacing:.01em;margin:0 0 8px}
+ .r.m .v{color:#0b6b3f}.r.x .v{color:#a81f18}.r.e .v{color:#a81f18}
+ .r p{margin:0 0 8px;font-size:15px;color:#3d4653}
+ .r p.pu{font-weight:600;color:#14171b}
  dl{margin:14px 0 0;font-size:13px}
- dt{color:#7a7974;margin:10px 0 2px;letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+ dt{color:#626d7d;margin:10px 0 2px;letter-spacing:.05em;text-transform:uppercase;font-size:11px}
  dd{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-   word-break:break-all;color:#28251d}
- .b{border-top:1px solid #d4d1ca;margin:34px 0 0;padding:18px 0 0;color:#7a7974;font-size:13.5px}
- a{color:#01696f}
+   word-break:break-all;color:#14171b}
+ .qr{background:#fff;border:1px solid #dfe4ec;border-radius:10px;padding:10px;
+   display:inline-block;line-height:0;margin:14px 0 0}
+ .qr img{width:132px;height:132px;display:block}
+ .b{border-top:1px solid #dfe4ec;margin:34px 0 0;padding:18px 0 0;color:#626d7d;font-size:13.5px}
+ a{color:#1f68d8}
 </style></head><body><div class="w">
+<p class="mk">Hiv<s>e</s></p>
 <h1>Hive public record check</h1>
 <p class="sub">Paste a record identifier and the text you want checked. This page
 runs without scripts and stores nothing about you.</p>
@@ -452,3 +478,59 @@ def _render_verifier(rid, txt, out):
                    escape(out["checked_at"])))
     return render_template_string(_VERIFIER_HTML, rid=escape(rid or ""),
                                   txt=escape(txt or ""), result=block)
+
+
+# Served when a scripts-blocked browser posts the issue form. Same shell and
+# palette as the verifier so the sequence looks like one product.
+_ISSUED_HTML = """<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Record issued</title>
+<style>{{ css|safe }}</style></head><body><div class="w">
+<p class="mk">Hiv<s>e</s></p>
+{{ body|safe }}
+<p class="b">Keep the identifier above. Anyone can check this record here, free,
+with no account, for as long as this service runs. A check shows whether a copy
+of the text differs from what was recorded. It does not show who changed
+anything, why, or that a change was stopped.</p>
+</div></body></html>"""
+
+
+def _shell_css():
+    m = re.search(r"<style>(.*?)</style>", _VERIFIER_HTML, re.S)
+    return m.group(1) if m else ""
+
+
+def _render_issued(out):
+    if "error" in out:
+        body = ('<h1>That did not go through</h1>'
+                '<div class="r e"><p class="v">NOT RECORDED</p><p>%s</p></div>'
+                '<p><a href="/briefing/">Back to the four presses</a></p>'
+                % escape(out["error"]))
+        return render_template_string(_ISSUED_HTML, css=_shell_css(), body=body)
+    sb = out["signed_body"]
+    rid = out["receipt_id"]
+    url = "%s/briefing/check?id=%s" % (PUBLIC_BASE, rid)
+    body = (
+        '<h1>Recorded and countersigned</h1>'
+        '<p class="sub">This record is anchored in an append only log. Change the '
+        'text on the next screen and it will not match.</p>'
+        '<div class="r m"><p class="v">ANCHORED</p>'
+        '<p>%s</p>'
+        '<dl><dt>Record identifier</dt><dd>%s</dd>'
+        '<dt>Fingerprint</dt><dd>%s</dd>'
+        '<dt>Recorded at</dt><dd>%s</dd>'
+        '<dt>Log position</dt><dd>%s</dd></dl></div>'
+        '<h1>Check it from any device</h1>'
+        '<p class="sub">Open this on a phone that has never seen this site. Same '
+        'record, same answer, no account.</p>'
+        '<p><a href="%s">%s</a></p>'
+        '<div class="qr"><img src="/briefing/qr?id=%s" width="132" height="132"'
+        ' alt="Code linking to the public verifier, loaded with this record."></div>'
+        % (escape(sb["action_text"]), escape(rid),
+           escape(sb["action_digest_sha256"]), escape(sb["observed_at"]),
+           escape(str(out["countersignature"]["signed_over"]["seq"])),
+           escape(url), escape(url), escape(rid)))
+    return render_template_string(_ISSUED_HTML, css=_shell_css(), body=body)
