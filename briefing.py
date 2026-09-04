@@ -155,6 +155,11 @@ def _countersign_local(record, op_sig, op_scheme):
         sig = base64.b64encode(cs.KEY.sign(cs.canon(signed_over))).decode()
         entry = dict(signed_over)
         entry["countersignature"] = sig
+        # The persistent volume normally creates this directory before the
+        # process starts. Local runs, a remounted disk, or a replaced volume
+        # can still leave it absent. Create it at the write boundary so one
+        # missing directory cannot turn a valid receipt request into a 500.
+        os.makedirs(os.path.dirname(cs.LOG_PATH), exist_ok=True)
         with open(cs.LOG_PATH, "a") as f:
             f.write(json.dumps(entry, sort_keys=True) + "\n")
             f.flush()
