@@ -247,6 +247,16 @@
    "label": "Hive demo or example recorder key",
    "alg": "Ed25519",
    "sha256": "95571870d62aecb76d0e241780b49a8deb85026e3ffb7809b4ad4b60080cf94d"
+  },
+  {
+   "label": "Hive service signing key (thehiveryiq.com issuer in the witness log)",
+   "alg": "Ed25519",
+   "sha256": "e31b5daec3e841738bfe61ecd0d32ea4205b60b8f6023a16aae0a86b4cad5cfe"
+  },
+  {
+   "label": "Hive service signing key (thehiveryiq.com issuer in the witness log)",
+   "alg": "Ed25519",
+   "sha256": "ebec67369814ad119f21f8215d1a5c847e7bca4d28ca1fa4e61e8461d5e4dce5"
   }
  ]
 }
