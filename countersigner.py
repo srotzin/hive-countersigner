@@ -6,11 +6,12 @@ proofs so a relying party can check that a record was logged without asking the
 serving operator for anything.
 
 HONESTY BOUNDARY, read this before quoting the service anywhere.
-This process is operated by Hive today. It is a second key and a second clock,
-not an independent third party. Independence is a deployment property, not a
-code property, and this code does not create it. /health reports
-independent: false and says so in words. Do not describe this as neutral,
-independent, or third party until it runs somewhere Hive does not control.
+This process is operated by Hive (operator: "hive"). It is a second key and a
+second clock. It is never independent of Hive, and /health says so. Independence
+is judged relative to each receipt's issuer: independent_of_issuer is true only
+when the issuer key is stated and is not a Hive-operated key (see
+independence.py). Hive-issued receipts read false. Do not describe this service
+as neutral, a third party, or independent of Hive.
 
 Signature scheme here is Ed25519, not ML-DSA. The operator signer at
 signer.thehiveryiq.com is ML-DSA-65. Those are different schemes and the
@@ -22,6 +23,7 @@ from flask import Flask, request, jsonify
 from blake3 import blake3
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from cryptography.hazmat.primitives import serialization
+import independence
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEY_PATH = os.environ.get("COUNTERSIGNER_KEY_PATH", os.path.join(HERE, "countersigner_key.pem"))
@@ -141,6 +143,8 @@ def apply_path(leaf, path):
         cur = h(((cur + sib) if side == "right" else (sib + cur)).encode(), "node")
     return cur
 
+independence.add_hive_key(PUB_B64, "hive-countersigner own key")
+
 app = Flask(__name__)
 
 # The browser verifier on thehiveryiq.com checks countersignatures client side,
@@ -161,10 +165,10 @@ def _preflight(_any=None):
 INDEPENDENCE_NOTE = (
     "This countersigner is operated by Hive. It holds a separate key and keeps a "
     "separate clock and log from the serving operator, which removes self-dated "
-    "records and undetected conflicting records. It does not make Hive an "
-    "independent party, because Hive runs both sides today. Independence is a "
-    "deployment property. Do not describe this service as independent, neutral or "
-    "third party while this flag reads false."
+    "records and undetected conflicting records. It is not independent of Hive. "
+    "Independence is issuer-relative: each countersigned entry carries "
+    "independent_of_issuer, true only when the issuer key is stated and is not a "
+    "Hive-operated key. " + independence.RULE
 )
 
 @app.get("/health")
@@ -187,7 +191,12 @@ def health():
             "process lifetime only, and do not describe it as a durable "
             "transparency log."),
         "log_root": merkle_root([e["leaf"] for e in log]),
+        "operator": independence.OPERATOR,
         "independent": False,
+        "independent_of_hive": False,
+        "independence_scope": "issuer-relative",
+        "independence_rule": independence.RULE,
+        "hive_operated_key_count": len(independence.HIVE_KEY_FPS),
         "independence_note": INDEPENDENCE_NOTE,
         "briefing_receipts": globals().get("BRIEFING_ENABLED", False),
         "briefing_error": globals().get("BRIEFING_ERROR"),
@@ -205,6 +214,8 @@ def countersign():
         return jsonify({"error": "operator signature absent or too short to be real",
                         "min_chars": MIN_OPERATOR_SIG, "got_chars": len(op_sig)}), 422
 
+    issuer_key, issuer_id = independence.issuer_from(body, record)
+    ind = independence.assess(issuer_key, issuer_id)
     record_digest = h(canon(record), "record")
     with _lock:
         log = read_log()
@@ -222,6 +233,9 @@ def countersign():
             "countersigner_time": cs_time,
             "prev_leaf": prev,
             "leaf": leaf,
+            "operator": ind["operator"],
+            "issuer_key_sha256": ind["issuer_key_sha256"],
+            "independent_of_issuer": ind["independent_of_issuer"],
         }
         cs_sig = base64.b64encode(KEY.sign(canon(signed_over))).decode()
         entry = dict(signed_over)
@@ -240,8 +254,14 @@ def countersign():
         "countersignature_scheme": "Ed25519",
         "countersigner_public_key_b64": PUB_B64,
         "log_root_after": root,
+        "operator": independence.OPERATOR,
         "independent": False,
-        "note": "Second key and second clock. Not an independent party. See /health.",
+        "independent_of_hive": False,
+        "independent_of_issuer": ind["independent_of_issuer"],
+        "independence_basis": ind["independence_basis"],
+        "note": ("Second key and second clock, operated by Hive. Not independent of Hive. "
+                 "independent_of_issuer is relative to the issuer key whose SHA-256 is in "
+                 "signed_over; it applies only if that key is the one that verifies the record."),
     })
 
 @app.get("/log/head")

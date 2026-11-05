@@ -1,0 +1,152 @@
+{
+ "v": "hive.operated-keys/1",
+ "note": "Keys Hive holds or operates. A receipt whose issuer key is in this set, or whose stated issuer is a did:hive identifier or a Hive host, is Hive-issued, so the countersigner is not independent of that issuer. Fingerprint = SHA-256 of the raw public key bytes. Extend at deploy time with HIVE_OPERATED_KEYS (comma-separated keys or sha256: fingerprints). The countersigner's own key is always included.",
+ "generated": "2026-11-05",
+ "keys": [
+  {
+   "label": "did:hive:typed-receipts-v1 (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "00a907e954f5e878ca0f82fcd116d9e6d0d59f38b731a36863e53f2c820f72b5"
+  },
+  {
+   "label": "did:hive:typed-receipts-v2 (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "dc6b9104b286887382abb04b560e9a08c6544193ed8af0f2afe7de3b47670606"
+  },
+  {
+   "label": "did:hive:example:parity-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "959a80191f7640f9ca5a36cffefcfcd7a90c07291d3c940a862a2a990907b503"
+  },
+  {
+   "label": "did:hive:example:parity-attestor-a (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "d4b7fe287dadd5779f402b30fe5711de83c59251c8b40559e27f7e301782f42a"
+  },
+  {
+   "label": "did:hive:example:parity-attestor-b (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "9c1165e101c1bae257f9c91a94fbb5171bdec3c4038d4b20cc53c937e866bede"
+  },
+  {
+   "label": "did:hive:example:detector-east-02 (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "1a09a6a1b85cec77787ba6ce26f18500a2434865cee04d79c69a481888f52fff"
+  },
+  {
+   "label": "did:hive:example:screening-engine (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "730a5edc28c2f8daf2d9dce3a01d5f205e35e55582eed2ba26219fabdd4cc9a8"
+  },
+  {
+   "label": "did:hive:example:compliance-officer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "b28baab33e1f95a78c7e9547554c3e95a2e38030a2c64ce45378f15d33a4ddd6"
+  },
+  {
+   "label": "did:hive:example:external-reviewer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "24b03a0e3818a49e05631efc80768d08e32a81a944748730f14f613af9e909a6"
+  },
+  {
+   "label": "did:hive:example:mandate-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "4885f815c08704c8badd446e683b2c0a6b5e82e1d25d8f9c9256982821c09024"
+  },
+  {
+   "label": "did:hive:example:mandate-attestor (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "3ec1c305a0e5c43b2690006aca3a499371428bc695383ce129b807270cf65ff7"
+  },
+  {
+   "label": "did:hive:example:trigger-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "5f01191dd5dda7970fa4a6f1ea50af89a51d1e135420a19fa1dd30b59b827cba"
+  },
+  {
+   "label": "did:hive:example:oracle-primary (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "07d4857652bdd2303b3bb773c8221754d8deed052c1d078e93a2f7a48505fa21"
+  },
+  {
+   "label": "did:hive:example:oracle-secondary (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "5292550d8c0f651237b6885fd72580c3af63620a211e2a886dbc4ef7c3ef27cf"
+  },
+  {
+   "label": "did:hive:example:path-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "745990f19e0c4ae1c70c932e298e6533c66a6e8a2ac3839d701397b56d4536d3"
+  },
+  {
+   "label": "did:hive:example:exposure-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "87cdb7f141674cb938fe730e4b4fcbac597b8cb45f35634e2ad90f684d039f3e"
+  },
+  {
+   "label": "did:hive:example:aggregate-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "7a64c3337b125aff699bf4a104581763c3a5b1fd3dcc2aa1e57ad7fd32757130"
+  },
+  {
+   "label": "did:hive:example:eval-administrator (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "14199f45b1c50f3991610f691cb14053766d00f4d34dc0b3ffe675623d55fa69"
+  },
+  {
+   "label": "did:hive:example:eval-witness (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "a1e7451e4997756cc85e3725350d1f67ee524aa5e6b995b41dd588865c9e408c"
+  },
+  {
+   "label": "did:hive:example:network-authority-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "a59c2e86f4f08e677b8b9c3d064dbe1c7ecfcd51bcf5559535657887066f2559"
+  },
+  {
+   "label": "did:hive:example:capture-commitment-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "1991486e0921bce775c67c1f837b3f748b79556b22889bc009dc403357f4362a"
+  },
+  {
+   "label": "did:hive:example:serving-state-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "233153268f9310e0b3e158b42df9d8878d0e401989cffd3144a5d378248dfeee"
+  },
+  {
+   "label": "did:hive:example:care-events-issuer (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "3d40f54fdaa4c174421b3ee4021241110763429b17974c0f4bc6e9a90203e6a9"
+  },
+  {
+   "label": "did:hive:example:care-counterparty (verifier /keys)",
+   "alg": "Ed25519",
+   "sha256": "6d2ea77c2752644ed9b9def7df7cdf8bb1ec83b24a6f424074fbb162a9631cfd"
+  },
+  {
+   "label": "witness.thehiveryiq.com witness and log key",
+   "alg": "Ed25519",
+   "sha256": "5bb4f26357059af7f05355fa42247108a21e7d6e6542ba4f0c55fc596007df24"
+  },
+  {
+   "label": "did:hive:hivetrust-issuer-001 trust anchor",
+   "alg": "Ed25519",
+   "sha256": "24c33d38f25e52cccd1959a61464be2bae7f8265ddc45035f5bfa042604cf927"
+  },
+  {
+   "label": "HiveCompute /count meter key",
+   "alg": "Ed25519",
+   "sha256": "b6888b6a6304eb38203e534e1cc2888865d4a786aa3d31872270ae732fe1bf32"
+  },
+  {
+   "label": "shared.thehiveryiq.com/ice-firm-hive checkpoint cosigner",
+   "alg": "Ed25519",
+   "sha256": "6433ca8812daa5a92a85099f6ee8818dfa8a10d1937ba748e30ca01505d57224"
+  },
+  {
+   "label": "did:hive:typed-demo ML-DSA-65 (signer.thehiveryiq.com and hive-typed-signer /pubkey)",
+   "alg": "ML-DSA-65",
+   "sha256": "3d8c8760f76d61a4029ef978836c655973bef13590339ebca878ad6485ae6f25"
+  }
+ ]
+}

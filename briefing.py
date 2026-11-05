@@ -12,9 +12,10 @@ on a mounted persistent disk. It was missing exactly one thing: a public read
 route. That is what this module adds.
 
 HONESTY BOUNDARY, read before quoting any of this anywhere.
-  * A second key and a second clock is not an independent third party. Hive runs
-    both sides today. /health reports independent: false and this module never
-    contradicts it.
+  * A second key and a second clock, operated by Hive. Briefing records are
+    signed by Hive's own operator signer, so every briefing entry carries
+    independent_of_issuer: false. /health reports independent_of_hive: false
+    and this module never contradicts it.
   * The operator signature is ML-DSA-65. The countersignature is Ed25519. Never
     describe the countersignature as post quantum.
   * A digest comparison proves a record differs from what was anchored. It does
@@ -125,13 +126,15 @@ def _operator_sign(payload_text):
     return env, None
 
 
-def _countersign_local(record, op_sig, op_scheme):
+def _countersign_local(record, op_sig, op_scheme, issuer_public_key=None):
     """Append to the same log the /countersign route writes, in process.
 
     This does not loop back over HTTP. It takes the same lock and writes the
     same leaf shape, so a briefing record is a real entry in the same chain,
     not a parallel pretend one.
     """
+    # The briefing issuer is Hive's own operator signer, by construction.
+    ind = cs.independence.assess(issuer_public_key, None, hive_issued=True)
     record_digest = cs.h(cs.canon(record), "record")
     with cs._lock:
         log = cs.read_log()
@@ -151,6 +154,9 @@ def _countersign_local(record, op_sig, op_scheme):
             "countersigner_time": cs_time,
             "prev_leaf": prev,
             "leaf": leaf,
+            "operator": ind["operator"],
+            "issuer_key_sha256": ind["issuer_key_sha256"],
+            "independent_of_issuer": ind["independent_of_issuer"],
         }
         sig = base64.b64encode(cs.KEY.sign(cs.canon(signed_over))).decode()
         entry = dict(signed_over)
@@ -173,7 +179,11 @@ def _countersign_local(record, op_sig, op_scheme):
         "countersignature_scheme": "Ed25519",
         "countersigner_public_key_b64": cs.PUB_B64,
         "log_root_after": root,
+        "operator": ind["operator"],
         "independent": False,
+        "independent_of_hive": False,
+        "independent_of_issuer": False,
+        "independence_basis": ind["independence_basis"],
     }
 
 
@@ -212,7 +222,7 @@ def register(app):
         if err:
             return 503, {"error": err}
         op_sig = env["envelope_signature"]
-        countersig = _countersign_local(signed_body, op_sig, "ml-dsa-65")
+        countersig = _countersign_local(signed_body, op_sig, "ml-dsa-65", env.get("public_key"))
         receipt = {
             "receipt_id": rid,
             "signed_body": signed_body,
