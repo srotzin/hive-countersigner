@@ -139,7 +139,7 @@
    "sha256": "b6888b6a6304eb38203e534e1cc2888865d4a786aa3d31872270ae732fe1bf32"
   },
   {
-   "label": "shared.thehiveryiq.com/ice-firm-hive checkpoint cosigner",
+   "label": "Hive checkpoint cosigner (witness log cosignatures)",
    "alg": "Ed25519",
    "sha256": "6433ca8812daa5a92a85099f6ee8818dfa8a10d1937ba748e30ca01505d57224"
   },
@@ -147,6 +147,106 @@
    "label": "did:hive:typed-demo ML-DSA-65 (signer.thehiveryiq.com and hive-typed-signer /pubkey)",
    "alg": "ML-DSA-65",
    "sha256": "3d8c8760f76d61a4029ef978836c655973bef13590339ebca878ad6485ae6f25"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "68f5b035ce970678289f653662bbc3c3490c5b4394b83755423367cbcd37028b"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "77990aa441bceaede504edfcbfb90176c41585b01cd3c50d61fe5c41dd2d8a41"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "99643f6c81449351c900109a2651103ffea4988b8d6eea62fdcabbaed3a27489"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "57e46352827461f1837fa66836c5c841ae40a70fdcb9898c4ec4d1bd7cfbf5a7"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "0006fde3e3c08ab30e1cf8babf8ac7fb32836acf66ad1c6377eecfa434153989"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "05455796d88b07995345330c9d28e53365624edd21b352ec67cdc5c203cafa1d"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "06ae143ebcdb84b2012d0d8e1837e98c609d655eff64d91a3b3e04adeaf974ea"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "90ad9ee040225d3695995bdc1dfe131e4a8ec0e8cb49e1030d4833fe827e4ac5"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "3468ff03ae3d94b1ce4e2cded3e6fe28742f4277b724427101695add8f5c17d0"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "e0d7720d1b151905234af4d52db8161efc86c984faa83df034b04c883ee68b87"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "f3d0ee6f5d51de6316798a3c6ade596febb0ce4af27e02e963a8b28193346f71"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "e3140b99c6504b55fc577c2f91634e7ad62f0f7417b041e9d9b91d524c318066"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "d51f16b8a9c64af2c51ed5fef6eb81437af426580f6bace47544f02ffa2d17bd"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "56e1da92852ece77391f966bce77f86b5e2ca043b1a793ca1ca750a6f7dd0a98"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "04c6290347fdc5e825852806e8efc5a119bad7bef594b3235efbd8c0139e28dd"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "8194fdb009ebe5579e8f1ba2d75abb3128512ddbe3c18173ab8735dee639a6cb"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "3b93dbc3582e99f3027d6ac420535bab9ba66119e2bde9cd26dbbd5318ce72e3"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "b2537ee57a18ee3218d35e3e166e36718010de69d6614cf0e8fd67655b6507ec"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "501ea30e12067b075e132f3707f7c4890b32a3cddb842141b0ee0dad205ef088"
+  },
+  {
+   "label": "Hive demo or example recorder key",
+   "alg": "Ed25519",
+   "sha256": "95571870d62aecb76d0e241780b49a8deb85026e3ffb7809b4ad4b60080cf94d"
   }
  ]
 }
